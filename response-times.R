@@ -1,11 +1,19 @@
 responseTimes<-read.table("response-times.csv",header=T,sep=",")
 
-plot((responseTimes$timeStamp-min(responseTimes$timeStamp))/1000/60,responseTimes$Latency,xlab="Test time [min]",ylab="Latency [ms]",col=2,pch=18)
-dev.print(device=png,width=1200,height=900,"response-times.png")
+png(width=1200,height=900,filename="response-times.png")
+plot((responseTimes$timeStamp-min(responseTimes$timeStamp))/1000/60,responseTimes$Latency,xlab="Test time [min]",ylab="Latency [ms]",col="dodgerblue4",pch=18)
+dev.off()
 
-pie(summary(responseTimes$responseCode),col=c("steelblue3", "tomato2", "tomato3"), main="HTTP Response Codes")
-dev.print(device=png,width=1200,height=800,"response-codes.png")
+png(width=1200,height=800,filename="response-codes.png")
+par(lwd=2,fg=rgb(0,0,0,alpha=.5))
+pie(summary(responseTimes$responseCode),
+    clockwise=TRUE,
+    col=c("steelblue3", "tomato2", "tomato3"),
+    main="HTTP Response Codes"
+)
+dev.off()
 
+png(width=1200,height=800,filename="quantiles.png")
 plot(ecdf(responseTimes$Latency),main="Cumulative relative frequency of response times",xlab="Latency [ms]",ylab="Quantiles",pch=18)
 axis(2,at=c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,.95,1),labels=FALSE)
 axis(2,at=c(.95),labels=c("95%"),col="tomato3")
@@ -25,4 +33,4 @@ fastResponse = cumsum(table(cut(responseTimes$Latency,c(0,1000))))/nrow(response
 segments(1000,-1,1000,fastResponse,col="palegreen3",lty="dashed",lwd=2)
 points(c(1000),fastResponse,col="green4",pch=19)
 text(1000,fastResponse,paste(format(fastResponse*100,digits=3), "%"),col="green4",adj=c(1.1,-.3))
-dev.print(device=png,width=1200,height=800,"quantiles.png")
+dev.off()
