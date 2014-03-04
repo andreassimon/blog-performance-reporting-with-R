@@ -1,7 +1,15 @@
 responseTimes<-read.table("response-times.csv",header=T,sep=",")
 
 png(width=1200,height=900,filename="response-times.png")
-plot((responseTimes$timeStamp-min(responseTimes$timeStamp))/1000/60,responseTimes$Latency,xlab="Test time [min]",ylab="Latency [ms]",col="dodgerblue4",pch=18)
+# region test-time-latency
+plot((responseTimes$timeStamp-min(responseTimes$timeStamp))/1000/60,
+     responseTimes$Latency,
+     xlab="Test time [min]",
+     ylab="Latency [ms]",
+     col="dodgerblue4",
+     pch=18
+)
+# endregion test-time-latency# ...
 dev.off()
 
 png(width=1200,height=800,filename="response-codes.png")

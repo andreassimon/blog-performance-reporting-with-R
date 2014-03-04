@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+  </head>
+<body>
+
+"If you can't measure it, you can't manage it."<br />
+ &mdash;&nbsp;Peter Drucker
+
+<div class="code_block">
+<div class="code_header">/response-times.R</div>
+<%= `cat response-times.R | ./extract_region.rb test-time-latency | grep --invert-match "region" | pygmentize -l r -f html` %>
+</div>
+
+<img src="response-times.scaled.png" />
+
+<img src="response-codes.scaled.png" />
+
+<img src="quantiles.scaled.png" />
+
+</body>
+</html></p>
+
+<!--
+  vim:ft=markdown
+-->
