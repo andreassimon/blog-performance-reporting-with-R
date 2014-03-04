@@ -8,7 +8,7 @@ plot((responseTimes$timeStamp-min(responseTimes$timeStamp))/1000/60,
      responseTimes$Latency,
      xlab="Test time [min]",
      ylab="Latency [ms]",
-     col="dodgerblue4",
+     col=c("dodgerblue4", "tomato3", "tomato4")[unclass(responseTimes$responseCode)],
      pch=18
 )
 # endregion test-time-latency
