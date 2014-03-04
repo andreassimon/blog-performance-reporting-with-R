@@ -7,16 +7,99 @@
 "If you can't measure it, you can't manage it."<br />
  &mdash;&nbsp;Peter Drucker
 
+To be able to improve a system's performance I need to understand the current characteristics of its operation.
+So I created a *very* simple (you might call it na&iuml;ve as well) performance test with [JMeter](http://jmeter.apache.org).
+Executing the test for roughly 35 minutes resulted in <%= `cat response-times.csv | wc -l` %> lines of raw CSV data.
+But raw data does not provide any insight.
+In order to understand what is going on I needed some statistical numbers and charts.
+This is where [R](http://www.r-project.org/) comes into play.
+Reading data in is quite simple:
+
+<div class="code_block">
+<div class="code_header">/response-times.R</div>
+<%= `cat response-times.R | ./extract_region.rb read-table | grep --invert-match "region" | pygmentize -l r -f html` %>
+</div>
+
+First of all, I wanted an overview of the latency over the test runtime.
+
 <div class="code_block">
 <div class="code_header">/response-times.R</div>
 <%= `cat response-times.R | ./extract_region.rb test-time-latency | grep --invert-match "region" | pygmentize -l r -f html` %>
 </div>
 
-<img src="response-times.scaled.png" />
+[<img src="response-times.scaled.png" />](response-times.png)
 
-<img src="response-codes.scaled.png" />
+Response times seem to be pretty stable over time, I cannot identify any trends at first sight.
+Nevertheless, the results are split: requests are replied to either quite fast or after about 5 seconds.
+The "five second barrier" is interesting, though.
+It is too constant to be incidental.
+This begs for further investigation.
 
-<img src="quantiles.scaled.png" />
+As a next step, I analyzed the ratios of HTTP response codes during the test:
+
+<div class="code_block">
+<div class="code_header">/response-times.R</div>
+<%= `cat response-times.R | ./extract_region.rb response-codes | grep --invert-match "region" | pygmentize -l r -f html` %>
+</div>
+
+[<img src="response-codes.scaled.png" />](response-codes.png)
+
+About 2/3 of the requests are handled successfully, but 1/3 of the requests resulted in server errors.
+That's definitely too many and needs improvements.
+
+As a last, but very important step, I analyzed the overall service levels.
+So I created a plot of the [cumulated relative frequency](http://www.r-tutor.com/elementary-statistics/quantitative-data/cumulative-relative-frequency-graph) of the response times.
+
+<div class="code_block">
+<div class="code_header">/response-times.R</div>
+<%= `cat response-times.R | ./extract_region.rb cumulative-relative-frequencies | grep --invert-match "region" | pygmentize -l r -f html` %>
+</div>
+
+Important indicators are [usability barriers](http://www.nngroup.com/articles/response-times-3-important-limits/) and the 95 percentile.
+Regarding usability, the ultimate goal are 100&nbsp;ms response time; this makes the system appear instantaneous.
+1000&nbsp;ms response time are the maximum not to interrupt the user's flow of thought.
+
+<div class="code_block">
+<div class="code_header">/response-times.R</div>
+<%= `cat response-times.R | ./extract_region.rb usability-barriers | grep --invert-match "region" | pygmentize -l r -f html` %>
+</div>
+
+The 95 percentile is the "realistic maximum" response time.
+Beyond this limit are the extreme outliers that you cannot prevent on a loosely coupled, unreliable, distributed system like the internet.
+Fighting against these is a waste of your valuable time.
+But for service quality, it is important that *nearly* every user gets a reasonable response time.
+In order to calculate and plot the 95 percentile, I had to:
+
+<div class="code_block">
+<div class="code_header">/response-times.R</div>
+<%= `cat response-times.R | ./extract_region.rb ninetyfive-quantile | grep --invert-match "region" | pygmentize -l r -f html` %>
+</div>
+
+These calculations result in the following plot.
+
+[<img src="quantiles.scaled.png" />](quantiles.png)
+
+To sum it up, the system is able to
+
+  - serve 60.7 % of its users in 100 ms or less;
+  - serve 63.7 % of its users in 1000 ms or less;
+  - serve 95 % of its users in 5017 ms or less.
+
+It seems very likely that the successful requests are responded quickly, and that the responses that took about 5 seconds are the 503 errors.
+The timeout is probably caused by some kind of bottleneck.
+I did not investigate this further yet, but I am quite happy with the visualizations I produced.
+
+As always, the sources are available via [GitHub](https://github.com/andreassimon/blog-performance-reporting-with-R).
+
+References:
+
+ - [Advanced graphs](http://www.statmethods.net/advgraphs/index.html)
+ - [Intermediate plotting](http://www.cyclismo.org/tutorial/R/intermediatePlotting.html)
+ - [An Introduction to R](http://cran.r-project.org/doc/manuals/r-release/R-intro.html#The-class-of-an-object)
+ - [Kickstarting R &mdash; Plotting data &ndash; point/line graphs](http://cran.r-project.org/doc/contrib/Lemon-kickstart/kr_ptline.html)
+ - [R color names](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf)
+ - [R data import/export](http://cran.r-project.org/doc/manuals/R-data.html)
+ - [The R Graphics cookbook](http://www.cookbook-r.com/Graphs/)
 
 </body>
 </html></p>

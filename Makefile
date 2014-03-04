@@ -1,6 +1,6 @@
-default: response-times.csv analyze resize-screenshots blog-entry.html
+default: response-times.csv analyze resize-screenshots html
 
-blog-entry.html:
+html:
 	erubis blog-entry.md.erb | markdown > blog-entry.html
 
 resize-screenshots:
