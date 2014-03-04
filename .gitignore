@@ -1,6 +1,7 @@
 *.log
 
 # blog entry
+*.csv
 *.html
 
 # R

@@ -1,6 +1,6 @@
-default: analyze resize-screenshots html
+default: response-times.csv analyze resize-screenshots blog-entry.html
 
-html:
+blog-entry.html:
 	erubis blog-entry.md.erb | markdown > blog-entry.html
 
 resize-screenshots:
@@ -10,3 +10,6 @@ resize-screenshots:
 
 analyze:
 	R CMD BATCH response-times.R
+
+response-times.csv:
+	tar -xvf response-times.csv.tgz
